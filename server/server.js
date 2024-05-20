@@ -39,7 +39,7 @@ app.post('/staff', async (req, res) => {
 });
 
 app.get('/staff', async (req, res) => {
-  const staff = await Staff.find(req.query);
+  const staff = await Staff.find(req.query).maxTimeMS(30000);
   res.send(staff);
 });
 
@@ -59,10 +59,6 @@ app.delete('/staff/:id', async (req, res) => {
   } catch (error) {
     res.status(400).send(error);
   }
-});
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
 });
 
 const PORT = process.env.PORT || 3003;
