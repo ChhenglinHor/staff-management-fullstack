@@ -43,17 +43,25 @@ To get started with the system, follow these steps:
 Clone the repository: git clone https://github.com/ChhenglinHor/staff-management-fullstack.git
 
 Running Server
+
 cd to server folder
+
 Install dependencies: npm install
+
 Start the server: npm start
+
 Access the API at http://localhost:8000 (or the port you've configured in .env)
 
 Running unit tests for server
+
 npm test
 
 Running Client
+
 cd to web folder
+
 Install dependencies: npm install
+
 Start the server: npm start
 
 All done!!!
