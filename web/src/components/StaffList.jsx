@@ -30,11 +30,11 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 		setEditFormData(staff[index]);
 		setEditIndex(index);
 		setEditDialogOpen(true);
-	},[]);
+	}, []);
 
 	const handleEditChange = useCallback((e) => {
 		setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
-	},[]);
+	}, []);
 
 	const handleEditSubmit = useCallback(() => {
 		axios
@@ -52,7 +52,7 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 		setEditDialogOpen(false);
 		setEditFormData({});
 		setEditIndex(null);
-	},[]);
+	}, []);
 
 	return (
 		<>
@@ -78,25 +78,36 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{staff.map((member, index) => (
-							<TableRow key={member._id}>
-								<TableCell>{member.staffId}</TableCell>
-								<TableCell>{member.fullName}</TableCell>
-								<TableCell>{format(new Date(member.birthday), "yyyy-MM-dd")}</TableCell>
-								<TableCell>{member.gender === 1 ? "Male" : "Female"}</TableCell>
-								<TableCell>
-									<IconButton
-										onClick={() => onDelete(member._id)}
-										color="error"
-									>
-										<DeleteForeverOutlinedIcon />
-									</IconButton>
-									<IconButton onClick={() => handleEdit(index)}>
-										<EditOutlinedIcon />
-									</IconButton>
-								</TableCell>
+						{staff.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={6}>no records found</TableCell>
 							</TableRow>
-						))}
+						) : (
+							staff.map((member, index) => (
+								<TableRow key={member._id}>
+									<TableCell>{member.staffId}</TableCell>
+									<TableCell>{member.fullName}</TableCell>
+									<TableCell>
+										{format(new Date(member.birthday), "yyyy-MM-dd")}
+									</TableCell>
+									<TableCell>
+										{member.gender === 1 ? "Male" : "Female"}
+									</TableCell>
+									<TableCell>
+										<IconButton
+											onClick={() => onDelete(member._id)}
+											color="error"
+										>
+											<DeleteForeverOutlinedIcon />
+										</IconButton>
+										<IconButton onClick={() => handleEdit(index)}>
+											<EditOutlinedIcon />
+										</IconButton>
+									</TableCell>
+								</TableRow>
+							))
+						)}
+						{/* {} */}
 					</TableBody>
 				</Table>
 			</TableContainer>
@@ -123,7 +134,11 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 						label="Birthday"
 						type="date"
 						name="birthday"
-						value={editFormData.birthday ? format(new Date(editFormData.birthday), "yyyy-MM-dd") : ""}
+						value={
+							editFormData.birthday
+								? format(new Date(editFormData.birthday), "yyyy-MM-dd")
+								: ""
+						}
 						onChange={handleEditChange}
 						fullWidth
 						margin="normal"
