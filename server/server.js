@@ -4,13 +4,15 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
+const dotenv = require('dotenv');
 
+dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/staff_management", {
+mongoose.connect(process.env.MONGODB_URI, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
