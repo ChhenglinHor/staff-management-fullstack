@@ -18,8 +18,17 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install web dependencies
+        run: |
+          cd web
+          npm install
+
+      - name: Install server dependencies
+        run: |
+          cd server
+          npm install
 
       - name: Run tests
-        run: npm test
+        run: |
+          cd server
+          npm test
