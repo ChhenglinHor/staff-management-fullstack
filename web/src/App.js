@@ -14,12 +14,14 @@ import StaffList from "./components/StaffList";
 import AddStaffForm from "./components/AddStaffForm";
 import AdvancedSearch from "./components/AdvancedSearch";
 
+export const HOST_URL = process.env.REACT_APP_API_URL;
+
 const App = () => {
 	const [staff, setStaff] = useState([]);
 	const [open, setOpen] = useState(false);
 
 	const loadInitialStaff = useCallback(() => {
-		axios.get("http://localhost:3003/staff").then((response) => {
+		axios.get(`${HOST_URL}/staff`).then((response) => {
 			setStaff(response.data);
 		});
 	}, []);
@@ -34,7 +36,7 @@ const App = () => {
 	};
 
 	const handleDelete = (id) => {
-		axios.delete(`http://localhost:3003/staff/${id}`).then(() => {
+		axios.delete(`${HOST_URL}/staff/${id}`).then(() => {
 			setStaff(staff.filter((member) => member._id !== id));
 		});
 	};

@@ -10,6 +10,8 @@ import {
 	Select,
 } from "@mui/material";
 
+import HOST_URL from '../App';
+
 const AddStaffForm = React.memo(({ onAdd }) => {
 	const [form, setForm] = useState({
 		staffId: "",
@@ -31,7 +33,7 @@ const AddStaffForm = React.memo(({ onAdd }) => {
 		};
 
 		axios
-			.post("http://localhost:3003/staff", formattedForm)
+			.post(`${HOST_URL}/staff`, formattedForm)
 			.then((response) => {
 				onAdd(response.data);
 				setForm({

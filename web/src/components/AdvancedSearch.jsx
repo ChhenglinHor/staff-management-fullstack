@@ -2,6 +2,8 @@ import React, { useCallback, useState } from "react";
 import { TextField, Button, Box, MenuItem } from "@mui/material";
 import axios from "axios";
 
+import { HOST_URL } from "../App";
+
 const AdvancedSearch = React.memo(({ onSearchResults, reloadInitialStaff }) => {
 	const [criteria, setCriteria] = useState({
 		staffId: "",
@@ -16,7 +18,7 @@ const AdvancedSearch = React.memo(({ onSearchResults, reloadInitialStaff }) => {
 
 	const handleSearch = useCallback(() => {
 		axios
-			.get("http://localhost:3003/staff/search", { params: criteria })
+			.get(`${HOST_URL}/staff/search`, { params: criteria })
 			.then((response) => onSearchResults(response.data))
 			.catch((error) => console.error(error));
 	}, [criteria, onSearchResults]);
@@ -24,7 +26,7 @@ const AdvancedSearch = React.memo(({ onSearchResults, reloadInitialStaff }) => {
 	const handleExport = useCallback(
 		(type) => {
 			axios
-				.get(`http://localhost:3003/staff/export/${type}`, {
+				.get(`${HOST_URL}/staff/export/${type}`, {
 					params: criteria,
 					responseType: "blob",
 				})

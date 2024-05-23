@@ -20,6 +20,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import axios from "axios";
 import { format } from "date-fns";
+import { HOST_URL } from "../App";
 
 const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -38,7 +39,7 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 
 	const handleEditSubmit = useCallback(() => {
 		axios
-			.put(`http://localhost:3003/staff/${editFormData._id}`, editFormData)
+			.put(`${HOST_URL}/staff/${editFormData._id}`, editFormData)
 			.then((response) => {
 				handleEditDialogClose();
 				onEdit(editIndex, response.data);
