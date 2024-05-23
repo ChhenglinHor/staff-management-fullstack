@@ -1,56 +1,86 @@
-// src/App.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import {
+	Button,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
+	Box,
+	Typography,
+} from "@mui/material";
+
+import StaffList from "./components/StaffList";
+import AddStaffForm from "./components/AddStaffForm";
+import AdvancedSearch from "./components/AdvancedSearch";
 
 const App = () => {
-  const [staff, setStaff] = useState([]);
-  const [form, setForm] = useState({
-    staffId: '',
-    fullName: '',
-    birthday: '',
-    gender: 1,
-  });
+	const [staff, setStaff] = useState([]);
+	const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    axios.get('http://localhost:3000/staff').then((response) => {
-      setStaff(response.data);
-    });
-  }, []);
+	const loadInitialStaff = useCallback(() => {
+		axios.get("http://localhost:3003/staff").then((response) => {
+			setStaff(response.data);
+		});
+	}, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+	useEffect(() => {
+		loadInitialStaff();
+	}, [loadInitialStaff]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    axios.post('http://localhost:3000/staff', form).then((response) => {
-      setStaff([...staff, response.data]);
-    });
-  };
+	const handleAdd = (newStaff) => {
+		setStaff([...staff, newStaff]);
+		handleClose();
+	};
 
-  // Add edit, delete, and search functionalities
+	const handleDelete = (id) => {
+		axios.delete(`http://localhost:3003/staff/${id}`).then(() => {
+			setStaff(staff.filter((member) => member._id !== id));
+		});
+	};
 
-  return (
-    <div>
-      <h1>Staff Management</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="text" name="staffId" placeholder="Staff ID" onChange={handleChange} />
-        <input type="text" name="fullName" placeholder="Full Name" onChange={handleChange} />
-        <input type="date" name="birthday" onChange={handleChange} />
-        <select name="gender" onChange={handleChange}>
-          <option value="1">Male</option>
-          <option value="2">Female</option>
-        </select>
-        <button type="submit">Add Staff</button>
-      </form>
+	const handleClickOpen = () => {
+		setOpen(true);
+	};
 
-      <ul>
-        {staff.map((member) => (
-          <li key={member._id}>{member.fullName}</li>
-        ))}
-      </ul>
-    </div>
-  );
+	const handleClose = () => {
+		setOpen(false);
+	};
+
+	const handleEdit = (index, updatedStaff) => {
+		const updatedStaffList = [...staff];
+		updatedStaffList[index] = updatedStaff;
+		setStaff(updatedStaffList);
+	};
+
+	const handleSearchResults = useCallback((results) => {
+		setStaff(results);
+	}, []);
+
+	return (
+		<Box pr={2} pl={2}>
+			<Box textAlign="center" mt={2} mb={2}>
+				<Typography variant="h4">Staff Management</Typography>
+			</Box>
+			<Button sx={{ mb: 2 }} variant="contained" onClick={handleClickOpen}>
+				Add New Staff
+			</Button>
+			<Dialog open={open} onClose={handleClose}>
+				<DialogTitle>Add New Staff</DialogTitle>
+				<DialogContent>
+					<AddStaffForm onAdd={handleAdd} />
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleClose}>Cancel</Button>
+				</DialogActions>
+			</Dialog>
+			<AdvancedSearch
+				onSearchResults={handleSearchResults}
+				reloadInitialStaff={loadInitialStaff}
+			/>
+			<StaffList staff={staff} onDelete={handleDelete} onEdit={handleEdit} />
+		</Box>
+	);
 };
 
 export default App;
