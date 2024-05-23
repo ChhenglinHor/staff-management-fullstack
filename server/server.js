@@ -97,35 +97,43 @@ app.get("/staff/export/excel", async (req, res) => {
 		query.birthday = { $gte: new Date(fromDate), $lte: new Date(toDate) };
 	}
 
-	const staff = await Staff.find(query);
+	try {
+		const staff = await Staff.find(query);
 
-	const workbook = new ExcelJS.Workbook();
-	const worksheet = workbook.addWorksheet("Staff Data");
+		if (staff.length === 0) {
+			return res.status(404).send("No staff found matching the criteria.");
+		}
 
-	worksheet.columns = [
-		{ header: "Staff ID", key: "staffId", width: 10 },
-		{ header: "Full Name", key: "fullName", width: 30 },
-		{ header: "Birthday", key: "birthday", width: 15 },
-		{ header: "Gender", key: "gender", width: 10 },
-	];
+		const workbook = new ExcelJS.Workbook();
+		const worksheet = workbook.addWorksheet("Staff Data");
 
-	staff.forEach((member) => {
-		worksheet.addRow({
-			staffId: member.staffId,
-			fullName: member.fullName,
-			birthday: member.birthday.toISOString().split("T")[0],
-			gender: member.gender === 1 ? "Male" : "Female",
+		worksheet.columns = [
+			{ header: "Staff ID", key: "staffId", width: 10 },
+			{ header: "Full Name", key: "fullName", width: 30 },
+			{ header: "Birthday", key: "birthday", width: 15 },
+			{ header: "Gender", key: "gender", width: 10 },
+		];
+
+		staff.forEach((member) => {
+			worksheet.addRow({
+				staffId: member.staffId,
+				fullName: member.fullName,
+				birthday: member.birthday.toISOString().split("T")[0],
+				gender: member.gender === 1 ? "Male" : "Female",
+			});
 		});
-	});
 
-	res.setHeader(
-		"Content-Type",
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	);
-	res.setHeader("Content-Disposition", "attachment; filename=staff.xlsx");
+		res.setHeader(
+			"Content-Type",
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+		);
+		res.setHeader("Content-Disposition", "attachment; filename=staff.xlsx");
 
-	await workbook.xlsx.write(res);
-	res.end();
+		await workbook.xlsx.write(res);
+		res.end();
+	} catch (error) {
+		res.status(500).send("Server error");
+	}
 });
 
 // Export to PDF Endpoint
@@ -139,25 +147,33 @@ app.get("/staff/export/pdf", async (req, res) => {
 		query.birthday = { $gte: new Date(fromDate), $lte: new Date(toDate) };
 	}
 
-	const staff = await Staff.find(query);
+	try {
+		const staff = await Staff.find(query);
 
-	const doc = new PDFDocument();
-	res.setHeader("Content-Type", "application/pdf");
-	res.setHeader("Content-Disposition", "attachment; filename=staff.pdf");
+		if (staff.length === 0) {
+			return res.status(404).send("No staff found matching the criteria.");
+		}
 
-	doc.pipe(res);
+		const doc = new PDFDocument();
+		res.setHeader("Content-Type", "application/pdf");
+		res.setHeader("Content-Disposition", "attachment; filename=staff.pdf");
 
-	doc.fontSize(12).text("Staff Data", { align: "center" });
+		doc.pipe(res);
 
-	staff.forEach((member) => {
-		doc.text(`Staff ID: ${member.staffId}`);
-		doc.text(`Full Name: ${member.fullName}`);
-		doc.text(`Birthday: ${member.birthday.toISOString().split("T")[0]}`);
-		doc.text(`Gender: ${member.gender === 1 ? "Male" : "Female"}`);
-		doc.moveDown();
-	});
+		doc.fontSize(16).text("Staff Data", { align: "center" }).moveDown();
 
-	doc.end();
+		staff.forEach((member) => {
+			doc.fontSize(12).text(`Staff ID: ${member.staffId}`);
+			doc.text(`Full Name: ${member.fullName}`);
+			doc.text(`Birthday: ${member.birthday.toISOString().split("T")[0]}`);
+			doc.text(`Gender: ${member.gender === 1 ? "Male" : "Female"}`);
+			doc.moveDown();
+		});
+
+		doc.end();
+	} catch (error) {
+		res.status(500).send("Server error");
+	}
 });
 
 const PORT = process.env.PORT || 3003;
