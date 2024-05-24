@@ -1,16 +1,19 @@
 const request = require("supertest");
-const mongoose = require("mongoose");
 const app = require("../server");
+const { MongoMemoryServer } = require("mongodb-memory-server");
+
+let mongod;
 
 beforeAll(async () => {
-	await mongoose.connect(process.env.MONGODB_URI, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	});
+  mongod = await MongoMemoryServer.create();
+  const mongoUri = await mongod.getUri();
+  process.env.MONGODB_URI = mongoUri;
+  console.log("Test MongoDB server started at", mongoUri);
 });
 
 afterAll(async () => {
-	await mongoose.connection.close();
+  await mongod.stop();
+  console.log("Test MongoDB server stopped");
 });
 
 describe("Staff Management API", () => {
