@@ -10,7 +10,7 @@ import {
 	Select,
 } from "@mui/material";
 
-import HOST_URL from '../App';
+import { HOST_URL } from "../App";
 
 const AddStaffForm = React.memo(({ onAdd }) => {
 	const [form, setForm] = useState({
@@ -20,21 +20,23 @@ const AddStaffForm = React.memo(({ onAdd }) => {
 		gender: 1, // 1 represents 'Male' and 2 represents 'Female'
 	});
 
-	const handleChange = useCallback((e) => {
-		setForm({ ...form, [e.target.name]: e.target.value });
-	}, []);
+	const handleChange = useCallback(
+		(e) => {
+			setForm({ ...form, [e.target.name]: e.target.value });
+		},
+		[form]
+	);
 
-	const handleSubmit = useCallback((e) => {
-		e.preventDefault();
+	const handleSubmit = useCallback(
+		(e) => {
+			e.preventDefault();
 
-		const formattedForm = {
-			...form,
-			birthday: new Date(form.birthday),
-		};
+			const formattedForm = {
+				...form,
+				birthday: new Date(form.birthday),
+			};
 
-		axios
-			.post(`${HOST_URL}/staff`, formattedForm)
-			.then((response) => {
+			axios.post(`${HOST_URL}/staff`, formattedForm).then((response) => {
 				onAdd(response.data);
 				setForm({
 					staffId: "",
@@ -43,7 +45,9 @@ const AddStaffForm = React.memo(({ onAdd }) => {
 					gender: 1,
 				});
 			});
-	}, []);
+		},
+		[form]
+	);
 
 	return (
 		<form onSubmit={handleSubmit}>
