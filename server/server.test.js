@@ -5,15 +5,15 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 let mongod;
 
 beforeAll(async () => {
-  mongod = await MongoMemoryServer.create();
-  const mongoUri = await mongod.getUri();
-  process.env.MONGODB_URI = mongoUri;
-  console.log("Test MongoDB server started at", mongoUri);
+	mongod = await MongoMemoryServer.create();
+	const mongoUri = await mongod.getUri();
+	process.env.MONGODB_URI = mongoUri;
+	console.log("Test MongoDB server started at", mongoUri);
 });
 
 afterAll(async () => {
-  await mongod.stop();
-  console.log("Test MongoDB server stopped");
+	await mongod.stop();
+	console.log("Test MongoDB server stopped");
 });
 
 describe("Staff Management API", () => {
@@ -29,7 +29,7 @@ describe("Staff Management API", () => {
 
 	it("should create a new staff member", async () => {
 		const res = await request(app).post("/staff").send({
-			staffId: "C123",
+			staffId: "C1234567",
 			fullName: "John Doe2",
 			birthday: "1990-01-01",
 			gender: 1,
@@ -37,6 +37,8 @@ describe("Staff Management API", () => {
 
 		expect(res.statusCode).toEqual(201);
 		expect(res.body).toHaveProperty("_id");
+		expect(res.body.staffId).toEqual("C1234567");
+		expect(res.body.fullName).toEqual("John Doe2");
 	});
 
 	it("should get all staff members", async () => {
@@ -47,7 +49,7 @@ describe("Staff Management API", () => {
 
 	it("should update an existing staff member", async () => {
 		const createResponse = await request(app).post("/staff").send({
-			staffId: "C1232",
+			staffId: "C1234568",
 			fullName: "Jane Doe",
 			birthday: "1995-05-05",
 			gender: 2,
@@ -61,16 +63,13 @@ describe("Staff Management API", () => {
 				fullName: updatedFullName,
 			});
 
-		expect(updateResponse.statusCode).toEqual(
-			200,
-			JSON.stringify(updateResponse.body)
-		);
+		expect(updateResponse.statusCode).toEqual(200);
 		expect(updateResponse.body.fullName).toEqual(updatedFullName);
 	});
 
 	it("should delete an existing staff member", async () => {
 		const createResponse = await request(app).post("/staff").send({
-			staffId: "B12327",
+			staffId: "B1234569",
 			fullName: "Alice Smith",
 			birthday: "1988-08-08",
 			gender: 2,
@@ -85,6 +84,13 @@ describe("Staff Management API", () => {
 	});
 
 	it("should search for staff members based on criteria", async () => {
+		await request(app).post("/staff").send({
+			staffId: "C1234570",
+			fullName: "John Smith",
+			birthday: "1988-08-08",
+			gender: 1,
+		});
+
 		const res = await request(app).get("/staff/search?gender=1");
 		expect(res.statusCode).toEqual(200);
 		expect(Array.isArray(res.body)).toBe(true);
