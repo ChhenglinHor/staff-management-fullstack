@@ -36,15 +36,24 @@ const AddStaffForm = React.memo(({ onAdd }) => {
 				birthday: new Date(form.birthday),
 			};
 
-			axios.post(`${HOST_URL}/staff`, formattedForm).then((response) => {
-				onAdd(response.data);
-				setForm({
-					staffId: "",
-					fullName: "",
-					birthday: "",
-					gender: 1,
+			axios
+				.post(`${HOST_URL}/staff`, formattedForm)
+				.then((response) => {
+					onAdd(response.data);
+					setForm({
+						staffId: "",
+						fullName: "",
+						birthday: "",
+						gender: 1,
+					});
+				})
+				.catch((error) => {
+					if (error.response && error.response.status === 400) {
+						alert("Invalid staffId or fullName");
+					} else {
+						alert("An error occurred while adding the staff member");
+					}
 				});
-			});
 		},
 		[form]
 	);

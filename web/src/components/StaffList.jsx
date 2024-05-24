@@ -27,15 +27,21 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 	const [editFormData, setEditFormData] = useState({});
 	const [editIndex, setEditIndex] = useState(null);
 
-	const handleEdit = useCallback((index) => {
-		setEditFormData(staff[index]);
-		setEditIndex(index);
-		setEditDialogOpen(true);
-	}, []);
+	const handleEdit = useCallback(
+		(index) => {
+			setEditFormData(staff[index]);
+			setEditIndex(index);
+			setEditDialogOpen(true);
+		},
+		[staff]
+	);
 
-	const handleEditChange = useCallback((e) => {
-		setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
-	}, []);
+	const handleEditChange = useCallback(
+		(e) => {
+			setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+		},
+		[editFormData]
+	);
 
 	const handleEditSubmit = useCallback(() => {
 		axios
@@ -46,8 +52,9 @@ const StaffList = React.memo(({ staff, onDelete, onEdit }) => {
 			})
 			.catch((error) => {
 				console.error("Error updating staff member:", error);
+				alert("An error occurred while editting the staff member");
 			});
-	}, []);
+	}, [editFormData]);
 
 	const handleEditDialogClose = useCallback(() => {
 		setEditDialogOpen(false);

@@ -21,9 +21,14 @@ const App = () => {
 	const [open, setOpen] = useState(false);
 
 	const loadInitialStaff = useCallback(() => {
-		axios.get(`${HOST_URL}/staff`).then((response) => {
-			setStaff(response.data);
-		});
+		axios
+			.get(`${HOST_URL}/staff`)
+			.then((response) => {
+				setStaff(response.data);
+			})
+			.catch((error) => {
+				alert("There is something went wrong on server");
+			});
 	}, []);
 
 	useEffect(() => {
@@ -36,9 +41,14 @@ const App = () => {
 	};
 
 	const handleDelete = (id) => {
-		axios.delete(`${HOST_URL}/staff/${id}`).then(() => {
-			setStaff(staff.filter((member) => member._id !== id));
-		});
+		axios
+			.delete(`${HOST_URL}/staff/${id}`)
+			.then(() => {
+				setStaff(staff.filter((member) => member._id !== id));
+			})
+			.catch((error) => {
+				alert("There is something went wrong on server");
+			});
 	};
 
 	const handleClickOpen = () => {
