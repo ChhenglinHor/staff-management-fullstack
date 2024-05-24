@@ -5,6 +5,8 @@ const cors = require("cors");
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 const dotenv = require("dotenv");
+const { buildStaffQuery } = require("./staffQueries");
+const { validateSearchQuery } = require("./utils/validationSearch");
 
 dotenv.config();
 const app = express();
@@ -76,18 +78,9 @@ app.delete("/staff/:id", async (req, res) => {
 	}
 });
 
-// Search
-app.get("/staff/search", async (req, res) => {
-	const { staffId, gender, fromDate, toDate } = req.query;
-
-	let query = {};
-	if (staffId) query.staffId = staffId;
-	if (gender) query.gender = gender;
-	if (fromDate && toDate) {
-		query.birthday = { $gte: new Date(fromDate), $lte: new Date(toDate) };
-	}
-
+app.get("/staff/search", validateSearchQuery, async (req, res) => {
 	try {
+		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
 		res.json(staff);
 	} catch (error) {
@@ -97,16 +90,8 @@ app.get("/staff/search", async (req, res) => {
 
 // Export to Excel Endpoint
 app.get("/staff/export/excel", async (req, res) => {
-	const { staffId, gender, fromDate, toDate } = req.query;
-
-	let query = {};
-	if (staffId) query.staffId = staffId;
-	if (gender) query.gender = gender;
-	if (fromDate && toDate) {
-		query.birthday = { $gte: new Date(fromDate), $lte: new Date(toDate) };
-	}
-
 	try {
+		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
 
 		if (staff.length === 0) {
@@ -147,16 +132,8 @@ app.get("/staff/export/excel", async (req, res) => {
 
 // Export to PDF Endpoint
 app.get("/staff/export/pdf", async (req, res) => {
-	const { staffId, gender, fromDate, toDate } = req.query;
-
-	let query = {};
-	if (staffId) query.staffId = staffId;
-	if (gender) query.gender = gender;
-	if (fromDate && toDate) {
-		query.birthday = { $gte: new Date(fromDate), $lte: new Date(toDate) };
-	}
-
 	try {
+		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
 
 		if (staff.length === 0) {
