@@ -27,16 +27,28 @@ mongoose
 	});
 
 const StaffSchema = new mongoose.Schema({
-	staffId: { type: String, required: true, unique: true },
-	fullName: { type: String, required: true },
+	staffId: { type: String, required: true, unique: true, length: 8 },
+	fullName: { type: String, required: true, maxlength: 100 },
 	birthday: { type: Date, required: true },
 	gender: { type: Number, required: true },
 });
 
 const Staff = mongoose.model("Staff", StaffSchema);
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+	console.error(err);
+	res.status(500).send("Internal Server Error");
+});
+
 // create
-app.post("/staff", async (req, res) => {
+app.post("/staff", async (req, res, next) => {
+	const { staffId, fullName } = req.body;
+
+	if (!staffId || !fullName || staffId.length !== 8 || fullName.length > 100) {
+		return res.status(400).send("Invalid staffId or fullName");
+	}
+
 	try {
 		const staff = new Staff(req.body);
 		await staff.save();
@@ -45,51 +57,55 @@ app.post("/staff", async (req, res) => {
 		if (error.name === "MongoServerError" && error.code === 11000) {
 			res.status(409).send("Duplicate staffId");
 		} else {
-			res.status(500).send("Internal Server Error");
+			next(error);
 		}
 	}
 });
 
 // read
-app.get("/staff", async (req, res) => {
-	const staff = await Staff.find(req.query).maxTimeMS(30000);
-	res.send(staff);
+app.get("/staff", async (req, res, next) => {
+	try {
+		const staff = await Staff.find(req.query).maxTimeMS(30000);
+		res.send(staff);
+	} catch (error) {
+		next(error);
+	}
 });
 
 // update
-app.put("/staff/:id", async (req, res) => {
+app.put("/staff/:id", async (req, res, next) => {
 	try {
 		const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, {
 			new: true,
 		});
 		res.send(staff);
 	} catch (error) {
-		res.status(400).send(error);
+		next(error);
 	}
 });
 
 // delete
-app.delete("/staff/:id", async (req, res) => {
+app.delete("/staff/:id", async (req, res, next) => {
 	try {
 		await Staff.findByIdAndDelete(req.params.id);
 		res.send({ message: "Staff deleted" });
 	} catch (error) {
-		res.status(400).send(error);
+		next(error);
 	}
 });
 
-app.get("/staff/search", validateSearchQuery, async (req, res) => {
+app.get("/staff/search", validateSearchQuery, async (req, res, next) => {
 	try {
 		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
 		res.json(staff);
 	} catch (error) {
-		res.status(500).send("Server error");
+		next(error);
 	}
 });
 
 // Export to Excel Endpoint
-app.get("/staff/export/excel", async (req, res) => {
+app.get("/staff/export/excel", async (req, res, next) => {
 	try {
 		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
@@ -126,12 +142,12 @@ app.get("/staff/export/excel", async (req, res) => {
 		await workbook.xlsx.write(res);
 		res.end();
 	} catch (error) {
-		res.status(500).send("Server error");
+		next(error);
 	}
 });
 
 // Export to PDF Endpoint
-app.get("/staff/export/pdf", async (req, res) => {
+app.get("/staff/export/pdf", async (req, res, next) => {
 	try {
 		const query = buildStaffQuery(req.query);
 		const staff = await Staff.find(query);
@@ -158,7 +174,7 @@ app.get("/staff/export/pdf", async (req, res) => {
 
 		doc.end();
 	} catch (error) {
-		res.status(500).send("Server error");
+		next(error);
 	}
 });
 
